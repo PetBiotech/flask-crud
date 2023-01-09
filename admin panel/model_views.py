@@ -9,7 +9,7 @@ class MyModelView(sqla.ModelView):
     def is_accessible(self):
         if not current_user.is_active or not current_user.is_authenticated:
             return False
-        if current_user.has_role('superuser') or current_user.has_role('username') :
+        if current_user.has_role('superuser') :
             return True
         return False
 
@@ -26,7 +26,43 @@ class MyModelView(sqla.ModelView):
                 # login
                 return redirect(url_for('security.login', next=request.url))
 
-class CarUserView(MyModelView):
+
+class usernameview(MyModelView):
+    def is_accessible(self):
+        if not current_user.is_active or not current_user.is_authenticated:
+            return False
+        if current_user.has_role('superuser') or current_user.has_role('user') :
+    
+            if current_user.has_role('user'):
+                self.can_create = False
+                self.can_edit = False
+                self.can_delete = False
+                self.can_export = False
+                print('working User')
+                
+            elif current_user.has_role('superuser'):
+                self.can_create = True
+                self.can_edit = True
+                self.can_delete = True
+                self.can_export = True
+                print('working Superuser')
+                
+            return True
+        return False
+            
+        
+    column_list=('id', 'first_name','last_name','username','email','active','roles','confirmed_at')
+
+
+
+class testUserView(MyModelView):
+
+    def is_accessible(self):
+        if not current_user.is_active or not current_user.is_authenticated:
+            return False
+        if current_user.has_role('superuser') or current_user.has_role('user') :
+            return True
+        return False
     
     column_display_pk = True
     form_columns = ['id', 'desc']
@@ -41,7 +77,7 @@ class CarUserView(MyModelView):
     edit_modal = True
     can_export = True
 
-class CarAdminView(MyModelView):
+class testAdminView(MyModelView):
     column_display_pk = True
     form_columns = ['id', 'desc']
     column_searchable_list = ['desc']
@@ -49,6 +85,7 @@ class CarAdminView(MyModelView):
     column_editable_list = ['desc']
     can_create = True
     can_edit = True
+    
     can_delete = True
     can_view_details = True
     page_size = 2

@@ -1,13 +1,7 @@
 # Create dummy secrey key so we can use sessions
 SECRET_KEY = '123456790'
 
-"""
-postgres_db = {'drivername': 'postgres',
-               'username': 'postgres',
-               'password': 'postgres',
-               'host': '192.168.99.100',
-               'port': 5432}
-"""
+
 
 # Create in-memory database
 DATABASE_FILE = 'test.db'

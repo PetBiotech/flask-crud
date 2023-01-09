@@ -9,9 +9,10 @@ from flask_security import (Security, SQLAlchemyUserDatastore,
 )
 from flask_security.utils import encrypt_password
 import flask_admin
+from flask_admin import BaseView
 from flask_admin import helpers as admin_helpers
 from flask_admin.contrib import sqla
-
+from datetime import datetime
 def create_app():
     # The template files will be stored in the [templates] directory
     app = Flask(__name__, template_folder="templates")
@@ -67,13 +68,13 @@ import forms
 # --------------------------------
 user_datastore = SQLAlchemyUserDatastore(db, Username, Profile)
 security = Security(app, user_datastore,
-                    login_form=forms.ExtendedLoginForm,
-                    register_form=forms.ExtendedRegisterForm)
+                    login_form=forms.ExtendedLoginForm)
+                    #register_form=forms.ExtendedRegisterForm)
 
 # --------------------------------
 # MODELS
 # --------------------------------
-class Car(db.Model):
+class test(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     desc = db.Column(db.String(50))
 
@@ -88,7 +89,7 @@ class usertest(db.Model):
 # MODEL VIEW CLASSES
 # --------------------------------
 from model_views import (
-    CarAdminView, CarUserView, MyModelView
+    testAdminView, testUserView, MyModelView, usernameview
 )
 
 # --------------------------------
@@ -111,12 +112,12 @@ admin = flask_admin.Admin(
 
 
 
-print(db.session)
-admin.add_view(CarAdminView(Car, db.session))
+
+admin.add_view(testAdminView(test, db.session))
 admin.add_view(MyModelView(Profile, db.session))
-admin.add_view(MyModelView(Username, db.session))
-print("false")
-admin.add_view(CarUserView(model=usertest, session=db.session,endpoint="post_special"))
+admin.add_view(usernameview(Username, db.session))
+
+admin.add_view(testUserView(model=usertest, session=db.session,endpoint="post_special"))
 
 
 
@@ -145,7 +146,7 @@ def build_sample_db():
     db.create_all()
 
     with app.app_context():
-        profile_user = Profile(name='username')
+        profile_user = Profile(name='user')
         profile_super_user = Profile(name='superuser')
         db.session.add(profile_user)
         db.session.add(profile_super_user)
@@ -156,7 +157,7 @@ def build_sample_db():
             username='admin',
             email='admin@test.com',
             password=encrypt_password('admin'),
-            roles=[profile_user, profile_super_user]
+            roles=[profile_super_user]
         )
 
         first_names = [
@@ -176,7 +177,9 @@ def build_sample_db():
                 username=first_names[i].lower(),
                 email=tmp_email,
                 password=encrypt_password(tmp_pass),
-                roles=[profile_user]
+                roles=[profile_user],
+                confirmed_at=datetime.now()
+                
             )
         db.session.commit()
     return
@@ -186,7 +189,7 @@ def build_sample_db():
 # --------------------------------
 if __name__ == '__main__':
     # Build a sample db on the fly, if one does not exist yet.
-    #db.create_all()
+    db.create_all()
     app_dir = os.path.realpath(os.path.dirname(__file__))
     database_path = os.path.join(app_dir, app.config['DATABASE_FILE'])
     if not os.path.exists(database_path):
